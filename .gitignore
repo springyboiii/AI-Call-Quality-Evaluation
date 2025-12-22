@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database / volumes
+postgres_data/
+rabbitmq_data/
+
+# Model artifacts
+*.pt
+*.bin
+
+# Audio artifacts (optional)
+data/
