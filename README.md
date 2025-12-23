@@ -12,9 +12,11 @@ graph LR
     B --> C["Transcription Worker"]
     C -->|"Save Transcript"| D[(PostgreSQL)]
     C -->|"Publish Eval Job"| E(("RabbitMQ<br/>evaluation_jobs"))
+    C -->|"Failed Job"| H(("RabbitMQ<br/>failed_queue"))
     E --> F["Evaluation Agent"]
     F -->|"Read / Write"| D
     F -->|"Inference"| G["LM Studio<br/>(localhost:1234)"]
+    F -->|"Failed Job"| H
 
 ```
 
