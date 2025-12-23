@@ -11,9 +11,6 @@ import time
 load_dotenv()
 
 class CallQualityAgent:
-    """
-    Agentic evaluator: reasoning + judgment only.
-    """
     def __init__(self, db: PostgresClient, mq: RabbitMQClient):
         self.llm = ChatOpenAI(
             base_url=os.getenv("LLM_BASE_URL"),
