@@ -75,10 +75,9 @@ class RabbitMQClient:
                 channel.basic_ack(delivery_tag=method.delivery_tag)
             except Exception as e:
                 print(f"Error processing message: {e}")
-                # Do not ack -> message will be re-queued
-                channel.basic_nack(
-                    delivery_tag=method.delivery_tag, requeue=True
-                )
+                # channel.basic_nack(
+                #     delivery_tag=method.delivery_tag, requeue=True
+                # )
 
         connection = self._connect()
         channel = connection.channel()

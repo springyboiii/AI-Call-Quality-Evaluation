@@ -18,7 +18,6 @@ class TranscriptionWorker:
         self.mq = MQClient
         self.db = DBClient
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        # self.device = "cpu"
         print(f"Loading Whisper model '{model_name}' on {self.device}...")
         self.model = whisper.load_model(model_name).to(self.device)
         print("Model loaded.")

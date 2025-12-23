@@ -105,6 +105,7 @@ Simply drop an audio file (`.mp3` or `.wav`) into the `DATA_PATH` directory.
 - Only 2 calls were available in the dataset. Hence not a thoroughly evaluated system
 - Unit tests are not implemented
 - Really long calls exceeding the context window of the model will be truncated
+- Whisper is the SOT model for audio transcription
 
 ### How system handles failures, retries and scaling
 

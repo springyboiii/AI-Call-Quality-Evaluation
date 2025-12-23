@@ -49,16 +49,6 @@ class PostgresClient:
         return call_id
 
     def update_call_status(self, call_id: str, status: str, error_message: str = None):
-        """
-        Update the processing status of a call.
-
-        Example statuses:
-        - TRANSCRIPTION_QUEUE
-        - EVALUATION_QUEUE
-        - EVALUATED
-        - FAILED
-        """
-
         try:
             with self.conn.cursor() as cur:
                 cur.execute(
