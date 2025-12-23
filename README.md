@@ -21,7 +21,7 @@ graph LR
 ```
 
 ### Components
-1.  **Ingestion Service** (`src/services/ingestion.py`): Monitors the `data/` directory for new `.mp3` or `.wav` files. Publishes jobs to RabbitMQ.
+1.  **Ingestion Service** (`src/services/ingestion.py`): Monitors the `data/` directory for new `.mp3`  files. Publishes jobs to RabbitMQ.
 2.  **Transcription Worker** (`src/services/transcription.py`): Consumes transcription jobs, runs Whisper locally to transcribe audio, and saves the transcript to the DB.
 3.  **Evaluation Agent** (`src/agents/eval_agent.py`): Consumes evaluation jobs, retrieves the transcript, and uses a local LLM (via LM Studio) to score the call based on greeting, empathy, compliance, etc.
 4.  **Database** (`src/db/init.sql`): Stores call metadata, full transcripts, prompts and structured evaluation results.
