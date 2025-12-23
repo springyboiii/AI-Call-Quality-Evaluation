@@ -2,7 +2,7 @@
 
 This project implements an end-to-end automated pipeline for evaluating customer service calls. It ingests audio files, transcribes them using OpenAI's Whisper model locally, and then uses an agentic LLM (via LM Studio) to evaluate the call quality against a defined framework.
 
-## 🏗️ Architecture and Data Flow
+## Architecture and Data Flow
 
 The system follows an event-driven architecture using RabbitMQ for orchestration and PostgreSQL for structured storage.
 
@@ -25,7 +25,7 @@ graph LR
 4.  **Database** (`src/db/init.sql`): Stores call metadata, full transcripts, prompts and structured evaluation results.
 5.  **RabbitMQ** (`src/clients/rabbitmq_client.py`): Manages message queues for job distribution.
 
-## 🚀 Prerequisites
+## Prerequisites
 
 Before running the project, ensure you have the following installed:
 
@@ -38,7 +38,7 @@ Before running the project, ensure you have the following installed:
     -   Load a model (e.g., `Llama 3` or `Mistral`).
     -   **Start the Local Server** on port `1234`.
 
-## 🛠️ Setup
+## Setup
 
 1.  **Clone the repository** and navigate to the project root.
 
@@ -60,7 +60,7 @@ Before running the project, ensure you have the following installed:
     LLM_API_KEY=lm-studio
     ```
 
-## 🏃 Usage
+## Usage
 
 It is recommended to run each service in a separate terminal window to see the logs.
 
@@ -89,7 +89,7 @@ Simply drop an audio file (`.mp3` or `.wav`) into the `data/` directory.
 2.  **Transcription** picks it up, transcribes it, and saves it to the `transcripts` table.
 3.  **Evaluation** reads the transcript, queries LM Studio, and saves the score to the `evaluations` table.
 
-## 📊 Database Tables
+## Database Tables
 
 -   **`calls`**: Tracks the status of each file (`TRANSCRIPTION_QUEUE`, `EVALUATION_QUEUE`, `EVALUATED`, `FAILED`).
 -   **`transcripts`**: Stores the raw text and JSON segments with timestamps.
@@ -110,7 +110,7 @@ Simply drop an audio file (`.mp3` or `.wav`) into the `data/` directory.
 - All services and the AI Agent can be scaled horizontally by running multiple instances of each
 - Horizontal scaling of Evaluation Agent will cause a bottlenech on the LLM at some point.
 
-## 🧪 Evaluation Framework & POC Details
+## Evaluation Framework & POC Details
 ### 1. AI vs Human Evaluation Comparison
 The POC compares the Artificial Intelligence (AI) agent's scores against Human Ground Truth 
 **Methodology**:
