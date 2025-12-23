@@ -25,9 +25,9 @@ class PostgresClient:
     def close(self):
         self.conn.close()
 
-    # -------------------------
-    # Call lifecycle
-    # -------------------------
+    # -----
+    # Calls 
+    # -----
 
     def create_call(self, audio_path: str, call_id: str, duration_seconds: float = None):
         
@@ -48,7 +48,7 @@ class PostgresClient:
             return None
         return call_id
 
-    def update_call_status(self, call_id: str, status: str):
+    def update_call_status(self, call_id: str, status: str, error_message: str = None):
         """
         Update the processing status of a call.
 
@@ -64,10 +64,11 @@ class PostgresClient:
                 cur.execute(
                     """
                     UPDATE calls
-                    SET status = %s
+                    SET status = %s,
+                    error_message = %s
                 WHERE id = %s
                 """,
-                (status, call_id)
+                (status, error_message, call_id)
             )
 
             if cur.rowcount == 0:
@@ -83,9 +84,9 @@ class PostgresClient:
         return True
 
 
-    # -------------------------
-    # Transcription persistence
-    # -------------------------
+    # -------------
+    # Transcription 
+    # -------------
 
     def save_transcript(
         self,
@@ -164,11 +165,49 @@ class PostgresClient:
 
         except Exception as e:
             print("Error fetching transcript:", e)
+            self.conn.rollback()
             return None
 
-    # -------------------------
-    # Evaluation persistence
-    # -------------------------
+    def get_transcripts(self):
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        call_id,
+                        transcript_text,
+                        segments,
+                        timestamped_text,
+                        human_transcript
+                    FROM transcripts
+                    """
+                )
+
+                rows = cur.fetchall()
+                if not rows:
+                    return None
+
+                return [
+                    {
+                        "id": row[0],
+                        "call_id": row[1],
+                        "transcript_text": row[2],
+                        "segments": row[3],
+                        "timestamped_text": row[4],
+                        "human_transcript": row[5]
+                    }
+                for row in rows
+                ]
+
+        except Exception as e:
+            print("Error fetching transcript:", e)
+            self.conn.rollback()
+            return None
+
+    # ----------
+    # Evaluation 
+    # ----------
 
     def save_evaluation(
         self,
@@ -182,12 +221,12 @@ class PostgresClient:
         raw_output: dict
     ):
         evaluation_id = str(uuid.uuid4())
-
-        with self.conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO evaluations (
-                    id,
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO evaluations (
+                        id,
                     call_id,
                     evaluator_type,
                     evaluator_version,
@@ -212,5 +251,88 @@ class PostgresClient:
                 )
             )
 
-        self.conn.commit()
+            self.conn.commit()
+        except Exception as e:
+            print("Error saving evaluation:", e)
+            self.conn.rollback()
+            return None
         return evaluation_id
+
+    def get_evaluations(self):
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        call_id,
+                        evaluator_type,
+                        evaluator_version,
+                        overall_score,
+                        category_scores,
+                        strengths,
+                        improvements,
+                        raw_output,
+                        human_output,
+                        created_at
+                    FROM evaluations
+                    """
+                )
+
+                rows = cur.fetchall()
+                if not rows:
+                    return None
+
+                return [
+                        {
+                        "id": row[0],
+                        "call_id": row[1],
+                        "evaluator_type": row[2],
+                        "evaluator_version": row[3],
+                        "overall_score": row[4],
+                        "category_scores": row[5],
+                        "strengths": row[6],
+                        "improvements": row[7],
+                        "raw_output": row[8],
+                        "human_output": row[9],
+                        "created_at": row[10]
+                        }
+                    for row in rows
+                ]
+
+        except Exception as e:
+            print("Error fetching evaluation:", e)
+            return None
+
+    # -------
+    # Prompts 
+    # -------
+
+    def get_active_prompt(self, name: str) -> dict:
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT name, version, content
+                    FROM prompts
+                    WHERE name = %s AND is_active = TRUE
+                    LIMIT 1
+                    """,
+                    (name,)
+                )
+
+                row = cur.fetchone()
+                if not row:
+                    return None
+
+                return {
+                    "name": row[0],
+                    "version": row[1],
+                    "content": row[2]
+                }
+
+        except Exception as e:
+            print("Error fetching transcript:", e)
+            self.conn.rollback()
+            return None

@@ -6,7 +6,8 @@ from watchdog.events import FileSystemEventHandler
 import uuid
 from src.clients.rabbitmq_client import RabbitMQClient
 from src.clients.postgres_client import PostgresClient
-
+from dotenv import load_dotenv
+load_dotenv()
 PROCESSED_FILE = "processed_files.txt"
 
 
@@ -77,14 +78,12 @@ class NewFileHandler(FileSystemEventHandler):
 def main():
     mq = RabbitMQClient()
     db = PostgresClient()
-    path = Path(
-        "C:/Users/sugum/OneDrive/Documents/Projects/Zone24x7/english-contact-center-audio-dataset/qa-automation-poc/data"
-    ).resolve()
+
+    path = Path(os.getenv("DATA_PATH")).resolve()
 
     print(f"Watching directory: {path}")
 
     processed = load_processed()
-    print(f"Loaded {len(processed)} processed files")
 
 
     scan_existing_files(path, processed, mq, db)

@@ -10,13 +10,13 @@ and return a structured evaluation suitable for database storage.
 
 QUALITY FRAMEWORK
 
-1. Greeting & Introduction
-2. Empathy and Tone
-3. Compliance Statements
-4. Product or Information Accuracy
-5. Call Closure Quality
-6. Customer Satisfaction
-7. Problem Resolution
+1. Greeting & Introduction - Did the agent greet the customer politely? Did the agent introduce themselves and their organization?
+2. Empathy and Tone - Did the agent acknowledge customer emotions or concerns? Was the tone professional, calm, and friendly? Did the agent avoid sounding rushed or dismissive?
+3. Compliance Statements - Did the agent follow regulatory requirements (e.g., disclosures, consent)? Did the agent adhere to company policies during the call?
+4. Product or Information Accuracy - Did the agent provide correct product/service information? Were instructions clear and actionable? Did the agent avoid misleading or ambiguous statements?
+5. Call Closure Quality - Did the agent confirm the customer’s issues were addressed? Did the agent summarize next steps or follow-up actions? Was the closing polite and professional?
+6. Customer Satisfaction - Did the customer respond positively or express satisfaction? Any signs of frustration or dissatisfaction captured in transcript?
+7. Problem Resolution - Was the customer’s issue resolved fully? Did the agent escalate appropriately if needed? Were solutions practical and implementable?
 
 SCORING
 - Score each category from 1 to 5

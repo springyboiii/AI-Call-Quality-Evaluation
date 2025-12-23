@@ -1,40 +1,50 @@
 from langchain_openai import ChatOpenAI
 from src.agents.prompts.prompt_templates import QUALITY_EVAL_PROMPT
-
+from tenacity import retry, stop_after_attempt, wait_exponential
 import torch
 import os 
 from src.clients.rabbitmq_client import RabbitMQClient
 from src.clients.postgres_client import PostgresClient
 import json 
+from dotenv import load_dotenv
+import time
+load_dotenv()
 
 class CallQualityAgent:
     """
     Agentic evaluator: reasoning + judgment only.
     """
-    def __init__(self, db: PostgresClient):
+    def __init__(self, db: PostgresClient, mq: RabbitMQClient):
         self.llm = ChatOpenAI(
-            base_url="http://localhost:1234/v1",
-            api_key="lm-studio",
+            base_url=os.getenv("LLM_BASE_URL"),
+            api_key=os.getenv("LLM_API_KEY"),
             temperature=0
         )
         self.db = db
+        self.prompt_template = self.db.get_active_prompt("QUALITY_EVAL")
+        self.mq = mq
 
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
     def evaluate(self, transcript: str) -> str:
-        prompt = QUALITY_EVAL_PROMPT.format(transcript=transcript)
+        prompt = self.prompt_template["content"].format(transcript=transcript)
+
+        start = time.time()
         response = self.llm.invoke(prompt)
+        duration = time.time() - start
+
+        print(f"LLM latency: {duration:.2f}s for call")
         return response.content
 
     def process_evaluation_job(self, message: dict):
         try:
             call_id = message.get("call_id")
-
+            print("Processing evaluation job for call:", call_id)
             call = self.db.get_transcript_by_call_id(call_id)
             
-            evaluation = self.evaluate(call["timestamped_text"])
-            try:
-                evaluation = json.loads(evaluation)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON from LLM: {e}\n{response.content}")
+            evaluation = self.evaluate(call["timestamped_text"])      
+
+            evaluation = json.loads(evaluation)
+
             print("Evaluation:", evaluation)
             transcript_id = self.db.save_evaluation(
                 call_id=call_id,
@@ -50,8 +60,9 @@ class CallQualityAgent:
             self.db.update_call_status(call_id, "EVALUATED")
 
         except Exception as e:
-            print("Error processing transcription job:", e)
-            self.db.update_call_status(call_id, "FAILED")
+            print("Error processing evaluation job:", e)
+            self.db.update_call_status(call_id, "FAILED", f"Evaluation failed: {str(e)}")
+            self.mq.publish("failed_jobs", {"file_path": message.get("file_path"), "call_id": message.get("call_id"), "error": f"Evaluation failed: {str(e)}"})
 
 
 def main():
@@ -60,7 +71,7 @@ def main():
     print("Waiting for evaluation jobs...")
 
 
-    agent = CallQualityAgent(db=db)
+    agent = CallQualityAgent(db=db, mq=mq)
     mq.consume(
         queue_name="evaluation_jobs",
         callback=agent.process_evaluation_job
