@@ -89,7 +89,7 @@ Simply drop an audio file (`.mp3` or `.wav`) into the `data/` directory.
 2.  **Transcription** picks it up, transcribes it, and saves it to the `transcripts` table.
 3.  **Evaluation** reads the transcript, queries LM Studio, and saves the score to the `evaluations` table.
 
-## 📊 Database Schema
+## 📊 Database Tables
 
 -   **`calls`**: Tracks the status of each file (`TRANSCRIPTION_QUEUE`, `EVALUATION_QUEUE`, `EVALUATED`, `FAILED`).
 -   **`transcripts`**: Stores the raw text and JSON segments with timestamps.
@@ -110,3 +110,29 @@ Simply drop an audio file (`.mp3` or `.wav`) into the `data/` directory.
 - All services and the AI Agent can be scaled horizontally by running multiple instances of each
 - Horizontal scaling of Evaluation Agent will cause a bottlenech on the LLM at some point.
 
+## 🧪 Evaluation Framework & POC Details
+### 1. AI vs Human Evaluation Comparison
+The POC compares the Artificial Intelligence (AI) agent's scores against Human Ground Truth 
+**Methodology**:
+*   **Matching**: Exact score match between AI and Human.
+*   **Similar**: Difference < 2 points.
+*   **Differing**: Difference >= 2 points. (Requires investigation).
+
+
+### 2. Metrics used to judge alignment
+
+*   **Mean Absolute Error (MAE)**: The average magnitude of errors in a set of predictions. Lower is better.
+*   **Accuracy (Within 1 point)**: The percentage of AI scores that are within 1 point of the human score. Higher is better.
+*   **Exact Match Accuracy**: The percentage of AI scores that exactly match the human score. Higher is better.
+*   **Spearman Correlation**: Measures the monotonicity of the relationship between human and AI rankings. Higher is better.
+*   **Cohen's Kappa**: Measures inter-rater reliability, accounting for the possibility of the agreement occurring by chance. Higher is better.
+
+### 3. Transcription Accuracy
+Transcription accuracy is critical for correct evaluation.
+*   **Word Error Rate (WER)** using the `jiwer` library 
+
+### 4. Failure Conditions for POC
+The POC would be considered a failure if:
+*   **Transcription Quality is too low**: If WER > 30%, the LLM cannot reliably evaluate the call.
+*   **Hallucinations**: If the Agent invents compliance statements that were not spoken (False Positives).
+*   **Latency**: If the local inference takes >5 minutes per call, it may not scale to 1,000 calls/day without massive hardware investment.
