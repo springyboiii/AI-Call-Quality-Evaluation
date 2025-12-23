@@ -83,7 +83,7 @@ python -m src.agents.eval_agent
 ```
 
 ### Triggering a Workflow
-Simply drop an audio file (`.mp3` or `.wav`) into the `data/` directory.
+Simply drop an audio file (`.mp3` or `.wav`) into the `DATA_PATH` directory.
 
 1.  **Ingestion** detects the file and sends a job.
 2.  **Transcription** picks it up, transcribes it, and saves it to the `transcripts` table.
