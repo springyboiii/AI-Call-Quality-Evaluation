@@ -102,6 +102,7 @@ Simply drop an audio file (`.mp3` or `.wav`) into the `DATA_PATH` directory.
 - Failed calls(marked as `FAILED` in the `calls` table) are sent to a `failed_jobs` queue for manual intervention
 - Only 2 calls were available in the dataset. Hence not a thoroughly evaluated system
 - Unit tests are not implemented
+- Really long calls exceeding the context window of the model will be truncated
 
 ### How system handles failures, retries and scaling
 
